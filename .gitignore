@@ -1,0 +1,15 @@
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.idea/
+*.iml
+.DS_Store
+# Секреты и ключи — НЕ коммитить
+android/key.properties
+*.jks
+*.keystore
+# google-services.json / GoogleService-Info.plist можно коммитить в учебном проекте,
+# но для публичного репозитория лучше убрать:
+# android/app/google-services.json

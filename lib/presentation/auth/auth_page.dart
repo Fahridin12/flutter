@@ -64,8 +64,11 @@ class _AuthPageState extends State<AuthPage> {
           listener: (context, state) {
             final notice = state.notice;
             if (notice == null) return;
+            final message = state.customMessage != null && notice == AuthNotice.unknown
+                ? state.customMessage!
+                : s.authNotice(notice);
             ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(s.authNotice(notice))));
+                .showSnackBar(SnackBar(content: Text(message)));
           },
           builder: (context, state) {
             return Center(

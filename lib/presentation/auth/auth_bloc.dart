@@ -70,6 +70,7 @@ enum AuthNotice {
   weakPassword,
   invalidEmail,
   network,
+  operationNotAllowed,
   unknown,
   resetEmailSent;
 
@@ -79,6 +80,7 @@ enum AuthNotice {
         AuthErrorCode.weakPassword => AuthNotice.weakPassword,
         AuthErrorCode.invalidEmail => AuthNotice.invalidEmail,
         AuthErrorCode.network => AuthNotice.network,
+        AuthErrorCode.operationNotAllowed => AuthNotice.operationNotAllowed,
         AuthErrorCode.cancelled || AuthErrorCode.unknown => AuthNotice.unknown,
       };
 }
@@ -89,6 +91,7 @@ class AuthState extends Equatable {
     this.user,
     this.busy = false,
     this.notice,
+    this.customMessage,
     this.noticeTick = 0,
   });
 
@@ -96,6 +99,7 @@ class AuthState extends Equatable {
   final AuthUser? user;
   final bool busy;
   final AuthNotice? notice;
+  final String? customMessage;
 
   /// Увеличивается при каждом новом сообщении, чтобы BlocListener сработал и на одинаковый текст.
   final int noticeTick;
@@ -106,6 +110,7 @@ class AuthState extends Equatable {
     bool clearUser = false,
     bool? busy,
     AuthNotice? notice,
+    String? customMessage,
     int? noticeTick,
   }) {
     return AuthState(
@@ -113,12 +118,13 @@ class AuthState extends Equatable {
       user: clearUser ? null : (user ?? this.user),
       busy: busy ?? this.busy,
       notice: notice ?? this.notice,
+      customMessage: customMessage ?? this.customMessage,
       noticeTick: noticeTick ?? this.noticeTick,
     );
   }
 
   @override
-  List<Object?> get props => [status, user, busy, notice, noticeTick];
+  List<Object?> get props => [status, user, busy, notice, customMessage, noticeTick];
 }
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -182,13 +188,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(state.copyWith(
           busy: false,
           notice: AuthNotice.fromCode(f.code),
+          customMessage: f.message,
           noticeTick: state.noticeTick + 1,
         ));
       }
-    } catch (_) {
+    } catch (e) {
       emit(state.copyWith(
         busy: false,
         notice: AuthNotice.unknown,
+        customMessage: e.toString(),
         noticeTick: state.noticeTick + 1,
       ));
     }

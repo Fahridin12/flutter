@@ -18,14 +18,16 @@ enum AuthErrorCode {
   invalidEmail,
   network,
   cancelled,
+  operationNotAllowed,
   unknown,
 }
 
 class AuthFailure implements Exception {
-  const AuthFailure(this.code);
+  const AuthFailure(this.code, [this.message]);
 
   final AuthErrorCode code;
+  final String? message;
 
   @override
-  String toString() => 'AuthFailure($code)';
+  String toString() => 'AuthFailure($code${message == null ? '' : ': $message'})';
 }

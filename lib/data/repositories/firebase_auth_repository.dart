@@ -87,11 +87,14 @@ class FirebaseAuthRepository implements AuthRepository {
     try {
       await action();
     } on FirebaseAuthException catch (e) {
-      throw AuthFailure(_code(e.code));
+      throw AuthFailure(_code(e.code), e.message ?? e.code);
     } on PlatformException catch (e) {
       throw AuthFailure(
         e.code == 'network_error' ? AuthErrorCode.network : AuthErrorCode.unknown,
+        e.message,
       );
+    } catch (e) {
+      throw AuthFailure(AuthErrorCode.unknown, e.toString());
     }
   }
 
@@ -104,6 +107,7 @@ class FirebaseAuthRepository implements AuthRepository {
         'email-already-in-use' => AuthErrorCode.emailInUse,
         'weak-password' => AuthErrorCode.weakPassword,
         'invalid-email' => AuthErrorCode.invalidEmail,
+        'operation-not-allowed' => AuthErrorCode.operationNotAllowed,
         'network-request-failed' => AuthErrorCode.network,
         _ => AuthErrorCode.unknown,
       };

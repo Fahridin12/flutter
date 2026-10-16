@@ -150,6 +150,10 @@ class AppStrings {
         AuthNotice.weakPassword => _t('Слишком простой пароль', 'Password is too weak'),
         AuthNotice.invalidEmail => invalidEmail,
         AuthNotice.network => _t('Нет подключения к интернету', 'No internet connection'),
+        AuthNotice.operationNotAllowed => _t(
+            'Провайдер Email/Password не включён в Firebase Console! Включите его в Authentication -> Sign-in method.',
+            'Email/Password sign-in provider is not enabled in Firebase Console! Enable it in Authentication -> Sign-in method.',
+          ),
         AuthNotice.unknown => _t('Не удалось выполнить вход', 'Sign-in failed'),
         AuthNotice.resetEmailSent => _t('Письмо для сброса пароля отправлено', 'Password reset email sent'),
       };

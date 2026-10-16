@@ -19,17 +19,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDqhW4SkshR4d-0RXZmjtvpH1emmX53bNs',
-    appId: '1:9490476714:web:b5372080b5706ec2f02ad3',
+    appId: '1:9490476714:web:3b71ecaa900d5177f02ad3',
     messagingSenderId: '9490476714',
     projectId: 'flutter-14dd5',
     authDomain: 'flutter-14dd5.firebaseapp.com',
     storageBucket: 'flutter-14dd5.firebasestorage.app',
-    measurementId: 'G-PRP3V5YYP5',
+    measurementId: 'G-4FZ2QRK5M4',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDqhW4SkshR4d-0RXZmjtvpH1emmX53bNs',
-    appId: '1:9490476714:web:b5372080b5706ec2f02ad3',
+    appId: '1:9490476714:web:3b71ecaa900d5177f02ad3',
     messagingSenderId: '9490476714',
     projectId: 'flutter-14dd5',
     storageBucket: 'flutter-14dd5.firebasestorage.app',
@@ -37,11 +37,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyDqhW4SkshR4d-0RXZmjtvpH1emmX53bNs',
-    appId: '1:9490476714:web:b5372080b5706ec2f02ad3',
+    appId: '1:9490476714:web:3b71ecaa900d5177f02ad3',
     messagingSenderId: '9490476714',
     projectId: 'flutter-14dd5',
     authDomain: 'flutter-14dd5.firebaseapp.com',
     storageBucket: 'flutter-14dd5.firebasestorage.app',
-    measurementId: 'G-PRP3V5YYP5',
+    measurementId: 'G-4FZ2QRK5M4',
   );
 }

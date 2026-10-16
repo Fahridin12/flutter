@@ -53,6 +53,17 @@ class DemoAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> signInOffline() async {
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    _user = const AuthUser(
+      uid: 'offline_student',
+      email: 'student@almau.kz',
+      displayName: 'Студент AlmaU',
+    );
+    _controller.add(_user);
+  }
+
+  @override
   Future<void> sendPasswordReset(String email) async {
     await Future<void>.delayed(const Duration(milliseconds: 200));
   }

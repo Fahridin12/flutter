@@ -143,6 +143,7 @@ class AppStrings {
   String get invalidEmail => _t('Введите корректный email', 'Enter a valid email');
   String get enterEmailFirst => _t('Сначала введите email', 'Enter your email first');
   String get demoSignIn => _t('Быстрый демо-вход', 'Quick demo sign-in');
+  String get offlineSignIn => _t('Войти в офлайн-режиме (без Firebase)', 'Continue in offline mode');
 
   String authNotice(AuthNotice n) => switch (n) {
         AuthNotice.invalidCredentials => _t('Неверный email или пароль', 'Wrong email or password'),

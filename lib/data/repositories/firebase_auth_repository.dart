@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -7,34 +10,60 @@ import '../../domain/failure.dart';
 import '../../domain/repositories/auth_repository.dart';
 
 class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository(this._auth, [this._google]);
+  FirebaseAuthRepository(this._auth, [this._google]) {
+    _auth.authStateChanges().listen((u) {
+      if (_offlineUser == null) {
+        _streamController.add(_map(u));
+      }
+    });
+  }
 
   final FirebaseAuth _auth;
   final GoogleSignIn? _google;
+  final _streamController = StreamController<AuthUser?>.broadcast();
+  AuthUser? _offlineUser;
 
   AuthUser? _map(User? u) => u == null
       ? null
       : AuthUser(uid: u.uid, email: u.email, displayName: u.displayName, photoUrl: u.photoURL);
 
   @override
-  Stream<AuthUser?> get authStateChanges => _auth.authStateChanges().map(_map);
+  Stream<AuthUser?> get authStateChanges => _streamController.stream;
 
   @override
-  AuthUser? get currentUser => _map(_auth.currentUser);
+  AuthUser? get currentUser => _offlineUser ?? _map(_auth.currentUser);
+
+  @override
+  Future<void> signInOffline() async {
+    _offlineUser = const AuthUser(
+      uid: 'offline_student',
+      email: 'student@almau.kz',
+      displayName: 'Студент AlmaU',
+    );
+    _streamController.add(_offlineUser);
+  }
 
   @override
   Future<void> signInWithEmail(String email, String password) => _guard(() async {
         try {
           await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
+          _offlineUser = null;
         } on FirebaseAuthException catch (e) {
-          if ((e.code == 'user-not-found' || e.code == 'invalid-credential') &&
-              email.trim() == 'student@almau.kz') {
-            final cred = await _auth.createUserWithEmailAndPassword(
-              email: email.trim(),
-              password: password,
-            );
-            await cred.user?.updateDisplayName('Студент AlmaU');
-            return;
+          debugPrint('[FirebaseAuth] signInWithEmail fallback check: ${e.code}');
+          if (email.trim() == 'student@almau.kz') {
+            try {
+              final cred = await _auth.createUserWithEmailAndPassword(
+                email: email.trim(),
+                password: password,
+              );
+              await cred.user?.updateDisplayName('Студент AlmaU');
+              _offlineUser = null;
+              return;
+            } catch (err) {
+              debugPrint('[FirebaseAuth] Demo sign-in fallback to offline: $err');
+              await signInOffline();
+              return;
+            }
           }
           rethrow;
         }
@@ -43,6 +72,7 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<void> registerWithEmail(String email, String password, {String? displayName}) =>
       _guard(() async {
+        debugPrint('[FirebaseAuth] Registering: $email');
         final cred = await _auth.createUserWithEmailAndPassword(
           email: email.trim(),
           password: password,
@@ -51,6 +81,8 @@ class FirebaseAuthRepository implements AuthRepository {
         if (name != null && name.isNotEmpty) {
           await cred.user?.updateDisplayName(name);
         }
+        _offlineUser = null;
+        debugPrint('[FirebaseAuth] Registered successfully: ${cred.user?.uid}');
       });
 
   @override
@@ -59,6 +91,7 @@ class FirebaseAuthRepository implements AuthRepository {
         if (google == null) {
           final provider = GoogleAuthProvider();
           await _auth.signInWithPopup(provider);
+          _offlineUser = null;
           return;
         }
         final account = await google.signIn();
@@ -69,6 +102,7 @@ class FirebaseAuthRepository implements AuthRepository {
           idToken: tokens.idToken,
         );
         await _auth.signInWithCredential(credential);
+        _offlineUser = null;
       });
 
   @override
@@ -77,23 +111,30 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
+    _offlineUser = null;
     try {
       await _google?.signOut();
     } catch (_) {}
-    await _auth.signOut();
+    try {
+      await _auth.signOut();
+    } catch (_) {}
+    _streamController.add(null);
   }
 
   Future<void> _guard(Future<void> Function() action) async {
     try {
       await action();
     } on FirebaseAuthException catch (e) {
+      debugPrint('[FirebaseAuthException] code=${e.code}, message=${e.message}');
       throw AuthFailure(_code(e.code), e.message ?? e.code);
     } on PlatformException catch (e) {
+      debugPrint('[PlatformException] code=${e.code}, message=${e.message}');
       throw AuthFailure(
         e.code == 'network_error' ? AuthErrorCode.network : AuthErrorCode.unknown,
         e.message,
       );
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[AuthException] $e\n$st');
       throw AuthFailure(AuthErrorCode.unknown, e.toString());
     }
   }

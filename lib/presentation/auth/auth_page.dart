@@ -64,11 +64,21 @@ class _AuthPageState extends State<AuthPage> {
           listener: (context, state) {
             final notice = state.notice;
             if (notice == null) return;
-            final message = state.customMessage != null && notice == AuthNotice.unknown
-                ? state.customMessage!
-                : s.authNotice(notice);
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(message)));
+            final base = s.authNotice(notice);
+            final text = (state.customMessage != null &&
+                    state.customMessage!.isNotEmpty &&
+                    notice != AuthNotice.operationNotAllowed)
+                ? '$base\n(${state.customMessage})'
+                : base;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(text),
+                duration: const Duration(seconds: 6),
+                backgroundColor: notice == AuthNotice.resetEmailSent
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.error,
+              ),
+            );
           },
           builder: (context, state) {
             return Center(
@@ -187,6 +197,15 @@ class _AuthPageState extends State<AuthPage> {
                                   ),
                           icon: const Icon(Icons.flash_on, size: 18),
                           label: Text(s.demoSignIn),
+                        ),
+                        TextButton.icon(
+                          onPressed: state.busy
+                              ? null
+                              : () => context
+                                  .read<AuthBloc>()
+                                  .add(const AuthOfflineSignInRequested()),
+                          icon: const Icon(Icons.cloud_off, size: 18),
+                          label: Text(s.offlineSignIn),
                         ),
                       ],
                     ),

@@ -48,6 +48,10 @@ class AuthGoogleSignInRequested extends AuthEvent {
   const AuthGoogleSignInRequested();
 }
 
+class AuthOfflineSignInRequested extends AuthEvent {
+  const AuthOfflineSignInRequested();
+}
+
 class AuthPasswordResetRequested extends AuthEvent {
   const AuthPasswordResetRequested(this.email);
 
@@ -146,6 +150,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
     on<AuthGoogleSignInRequested>((e, emit) => _run(emit, _repository.signInWithGoogle));
+    on<AuthOfflineSignInRequested>((e, emit) => _run(emit, _repository.signInOffline));
     on<AuthPasswordResetRequested>(
       (e, emit) => _run(
         emit,
